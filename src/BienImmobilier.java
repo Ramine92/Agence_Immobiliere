@@ -43,6 +43,11 @@ public class BienImmobilier {
     public String getDescription() {
         return description;
     }
+    // Setter pour l'agent associé au bien
+    public void setAgent(AgentImmobilier agent) {
+        this.agent = agent;
+    }
+
 
     public AgentImmobilier getAgent() {
         return agent;
@@ -57,4 +62,12 @@ public class BienImmobilier {
     public void setVendu(boolean vendu) {
         this.vendu = vendu;
     }
+    public String getDescriptionComplete() {
+        return "Type: " + type + "\n" +
+                "Surface: " + Surface + " m²\n" +
+                "Prix: " + prix + " DA\n" +
+                "Localisation: " + localisation + "\n" +
+                "Agent: " + agent;
+    }
 }
+

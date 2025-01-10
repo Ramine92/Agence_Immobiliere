@@ -4,19 +4,49 @@ import java.util.List;
 public class AgenceImmobiliere {
     private List<BienImmobilier> biens;
     private List<AgentImmobilier> agents;
-    private List<Contrat> contrats;
-    private List<Transaction> transactions;
-    private List<RendezVous> rendezVous;
-    private List<Client> clients;  // Liste des clients ajoutée
+    private List<Client> clients; // Liste des clients ajoutée
 
     public AgenceImmobiliere() {
         this.biens = new ArrayList<>();
         this.agents = new ArrayList<>();
-        this.contrats = new ArrayList<>();
-        this.transactions = new ArrayList<>();
-        this.rendezVous = new ArrayList<>();
-        this.clients = new ArrayList<>();  // Initialisation de la liste des clients
+        this.clients = new ArrayList<>(); // Initialisation de la liste des clients
     }
+
+    // Recherche des biens selon plusieurs critères
+    public List<BienImmobilier> rechercherBiens(String type, Double surfaceMin, Double surfaceMax, String localisation, Double prixMax) {
+        List<BienImmobilier> resultats = new ArrayList<>();
+        for (BienImmobilier bien : biens) {
+            boolean correspond = true;
+
+            // Vérification du type
+            if (type != null && !type.isEmpty() && !bien.getType().equalsIgnoreCase(type)) {
+                correspond = false;
+            }
+
+            // Vérification de la surface minimale
+            if (surfaceMin != null && bien.getSurface() < surfaceMin) {
+                correspond = false;
+            }
+
+            // Vérification de la localisation
+            if (localisation != null && !localisation.isEmpty() && !bien.getLocalisation().equalsIgnoreCase(localisation)) {
+                correspond = false;
+            }
+
+            // Vérification du prix maximum
+            if (prixMax != null && bien.getPrix() > prixMax) {
+                correspond = false;
+            }
+
+            // Si le bien correspond à tous les critères, on l'ajoute aux résultats
+            if (correspond) {
+                resultats.add(bien);
+            }
+        }
+        return resultats;
+    }
+
+
 
     // Ajouter un client
     public void ajouterClient(Client client) {
@@ -28,15 +58,24 @@ public class AgenceImmobiliere {
         }
     }
 
+    // Ajouter un agent immobilier
+    public void ajouterAgent(AgentImmobilier agent) {
+        agents.add(agent);
+        System.out.println("Agent ajouté : " + agent);
+    }
 
-    // Rechercher un client par son email
-    public Client rechercherClientParEmail(String email) {
+    public List<AgentImmobilier> getAgents() {
+        return agents;
+    }
+
+    // Rechercher un client par son nom
+    public Client rechercherClientParNom(String nom) {
         for (Client client : clients) {
-            if (client.getEmail().equalsIgnoreCase(email)) {
+            if (client.getNom().equalsIgnoreCase(nom)) {
                 return client;
             }
         }
-        return null;
+        return null; // Client non trouvé
     }
 
     // Rechercher un bien par son ID
@@ -49,15 +88,11 @@ public class AgenceImmobiliere {
         return null;
     }
 
-    // Ajouter un bien immobilier
+    // Ajouter un bien immobilier à un agent
     public void ajouterBien(BienImmobilier bien, AgentImmobilier agent) {
-        if (bienExistant(bien.getId())) {
-            System.out.println("Erreur : Le bien avec l'ID " + bien.getId() + " existe déjà.");
-        } else {
-            biens.add(bien);
-            agent.ajouterBien(bien);
-            System.out.println("Bien ajouté à l'agent " + agent + ": " + bien);
-        }
+        bien.setAgent(agent);  // Associe le bien à un agent
+        biens.add(bien);
+        agent.ajouterBien(bien); // Ajoute également à la liste des biens gérés par l'agent
     }
 
     // Vérifie si un bien existe déjà
@@ -70,58 +105,48 @@ public class AgenceImmobiliere {
         return false;
     }
 
-    // Ajouter un agent immobilier
-    public void ajouterAgent(AgentImmobilier agent) {
-        agents.add(agent);
-        System.out.println("Agent ajouté : " + agent);
+    public void acheterBien(BienImmobilier bien, Client client) {
+        bien.setVendu(true); // Marque le bien comme vendu
+        client.ajouterBienAchete(bien); // Ajouter le bien à la liste des biens achetés par le client
     }
 
-    // Rechercher un bien immobilier en fonction de critères
-    public List<BienImmobilier> rechercherBiens(String typeBien, Double surfaceMin, Double surfaceMax, String localisation, Double prixMax) {
-        List<BienImmobilier> resultats = new ArrayList<>();
-
+    // Dans la classe AgenceImmobiliere
+    public List<BienImmobilier> rechercherBiensDisponibles() {
+        List<BienImmobilier> disponibles = new ArrayList<>();
         for (BienImmobilier bien : biens) {
-            boolean correspond = true;
-
-            // Vérifier le type de bien
-            if (typeBien != null && !bien.getType().equalsIgnoreCase(typeBien)) {
-                correspond = false;
-            }
-
-            // Vérifier la localisation
-            if (localisation != null && !bien.getLocalisation().equalsIgnoreCase(localisation)) {
-                correspond = false;
-            }
-
-            // Vérifier le prix maximum
-            if (prixMax != null && bien.getPrix() > prixMax) {
-                correspond = false;
-            }
-
-            // Ajouter le bien si toutes les conditions sont remplies
-            if (correspond) {
-                resultats.add(bien);
+            if (!bien.isVendu()) {
+                disponibles.add(bien);
             }
         }
+        return disponibles;
+    }
 
-        return resultats;
+    public AgentImmobilier rechercherAgentParNom(String nom) {
+        for (AgentImmobilier agent : agents) {
+            if (agent.getNom().equals(nom)) {
+                return agent;
+            }
+        }
+        return null;  // Aucun agent trouvé avec ce nom
     }
 
 
+    // Point d'entrée principal
+    public static void main(String[] args) {
+        // Création de l'agence
+        AgenceImmobiliere agence = new AgenceImmobiliere();
 
+        // Création des agents
+        AgentImmobilier agent1 = new AgentImmobilier("Alice", "Dupont", new ArrayList<>());
+        AgentImmobilier agent2 = new AgentImmobilier("Bob", "Martin", new ArrayList<>());
+        AgentImmobilier agent3 = new AgentImmobilier("Angela", "White", new ArrayList<>());
 
+        // Ajout des agents à l'agence
+        agence.ajouterAgent(agent1);
+        agence.ajouterAgent(agent2);
+        agence.ajouterAgent(agent3);
 
-    // Autres méthodes pour gestion de transactions, contrats, paiements, etc.
-
-    public List<Client> getClients() {
-        return clients;
-    }
-
-    public List<AgentImmobilier> getAgents() {
-        return agents;
-    }
-
-    public List<BienImmobilier> getBiens() {
-        return biens;
+        // Affichage des agents
+        System.out.println("Liste des agents : " + agence.getAgents());
     }
 }

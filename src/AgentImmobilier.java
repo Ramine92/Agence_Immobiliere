@@ -5,6 +5,7 @@ public class AgentImmobilier {
     private String nom;
     private String prenom;
     private List<BienImmobilier> biens;
+    private AgentImmobilier agent;
 
     // Constructeur avec nom, prenom et une liste de biens
     public AgentImmobilier(String nom, String prenom, List<BienImmobilier> biens) {
@@ -14,12 +15,15 @@ public class AgentImmobilier {
     }
 
     // Ajouter un bien à l'agent
+// Ajouter un bien à la liste des biens gérés par cet agent
     public void ajouterBien(BienImmobilier bien) {
         biens.add(bien);
-        System.out.println("Bien ajouté à l'agent : " + bien);
+        System.out.println("Bien ajouté à l'agent " + nom + " " + prenom + ": " + bien.getId());
     }
 
+
     // Obtenir la liste des biens gérés par cet agent
+
     public List<BienImmobilier> getBiens() {
         return biens;
     }

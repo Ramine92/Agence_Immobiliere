@@ -1,18 +1,21 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Client {
     private String nom;
     private String prenom;
     private String email;
     private String telephone;
+    private List<BienImmobilier> biensAchetes;
 
-    // Constructor
     public Client(String nom, String prenom, String email, String telephone) {
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
         this.telephone = telephone;
+        this.biensAchetes = new ArrayList<>();
     }
 
-    // Getters and Setters
     public String getNom() {
         return nom;
     }
@@ -29,13 +32,17 @@ public class Client {
         return telephone;
     }
 
-    // Method to buy a property
-    public void acheterBien(BienImmobilier bien) {
-        if (bien.isVendu()) {
-            System.out.println("Le bien immobilier " + bien.getId() + " est déjà vendu.");
-        } else {
-            bien.setVendu(true);  // Mark the property as sold
-            System.out.println("Le bien immobilier " + bien.getId() + " a été acheté par " + this.nom + " " + this.prenom + ".");
-        }
+    public void ajouterBienAchete(BienImmobilier bien) {
+        biensAchetes.add(bien);
+    }
+
+    @Override
+    public String toString() {
+        return "Client{" +
+                "nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", email='" + email + '\'' +
+                ", telephone='" + telephone + '\'' +
+                '}';
     }
 }

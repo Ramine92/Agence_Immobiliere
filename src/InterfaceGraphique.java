@@ -1,6 +1,4 @@
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,10 +7,10 @@ public class InterfaceGraphique {
     private JFrame frame;
     private JPanel panel;
     private JButton ajouterBienButton;
-    private JButton ajouterAgentButton;
     private JButton ajouterClientButton;
     private JButton rechercherBiensButton;
     private JButton acheterBienButton;
+    private JButton afficherBiensDisponiblesButton;
     private JTextArea outputArea;
 
     public InterfaceGraphique(AgenceImmobiliere agence) {
@@ -22,20 +20,20 @@ public class InterfaceGraphique {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         // Initialisation des composants
-        this.ajouterBienButton = new JButton("Ajouter Bien");
-        this.ajouterAgentButton = new JButton("Ajouter Agent");
-        this.ajouterClientButton = new JButton("Ajouter Client");
-        this.rechercherBiensButton = new JButton("Rechercher Biens");
-        this.acheterBienButton = new JButton("Acheter Bien");
-        this.outputArea = new JTextArea(20, 40);
+        ajouterBienButton = new JButton("Ajouter Bien");
+        ajouterClientButton = new JButton("Ajouter Client");
+        rechercherBiensButton = new JButton("Rechercher Biens");
+        acheterBienButton = new JButton("Acheter Bien");
+        afficherBiensDisponiblesButton = new JButton("Afficher Biens Disponibles");
+        outputArea = new JTextArea(20, 40);
         outputArea.setEditable(false);
 
-        // Ajout des boutons à l'interface
+        // Ajouter les boutons au panneau
         panel.add(ajouterBienButton);
-        panel.add(ajouterAgentButton);
         panel.add(ajouterClientButton);
         panel.add(rechercherBiensButton);
         panel.add(acheterBienButton);
+        panel.add(afficherBiensDisponiblesButton);
         panel.add(new JScrollPane(outputArea));
 
         frame.add(panel);
@@ -43,131 +41,187 @@ public class InterfaceGraphique {
         frame.setSize(600, 400);
         frame.setVisible(true);
 
-        // Action pour ajouter un bien
-        ajouterBienButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Demander à l'utilisateur les informations pour le bien
-                String idBien = JOptionPane.showInputDialog(frame, "Entrez l'ID du Bien :");
-                String typeBien = JOptionPane.showInputDialog(frame, "Entrez le type de Bien :");
-                double surface = Double.parseDouble(JOptionPane.showInputDialog(frame, "Entrez la surface (en m²) :"));
-                double prix = Double.parseDouble(JOptionPane.showInputDialog(frame, "Entrez le prix :"));
-                String localisation = JOptionPane.showInputDialog(frame, "Entrez la localisation :");
-                String description = JOptionPane.showInputDialog(frame, "Entrez la description du bien :");
-
-                // Ajouter le bien
-                BienImmobilier bien = new BienImmobilier(idBien, typeBien, surface, prix, localisation, description);
-                // Par défaut, ajouter un agent existant ou un agent pré-créé pour l'exemple
-                AgentImmobilier agent = agence.getAgents().isEmpty()
-                        ? new AgentImmobilier("Nom", "Prénom", new ArrayList<>())
-                        : agence.getAgents().get(0);
-                agence.ajouterBien(bien, agent);
-                outputArea.append("Bien ajouté : " + bien.getDescription() + "\n");
+        // Actions des boutons
+        ajouterBienButton.addActionListener(e -> ajouterBien());
+        ajouterClientButton.addActionListener(e -> ajouterClient());
+        acheterBienButton.addActionListener(e -> acheterBien());
+        afficherBiensDisponiblesButton.addActionListener(e -> afficherBiensDisponibles());
+        rechercherBiensButton.addActionListener(e -> rechercherBiens());
+    }
+    private double promptForDouble(String message) {
+        while (true) {
+            try {
+                String input = JOptionPane.showInputDialog(frame, message);
+                if (input == null) return 0; // Annuler si l'utilisateur ferme la boîte de dialogue
+                return Double.parseDouble(input);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Veuillez entrer un nombre valide.");
             }
-        });
+        }
+    }
 
-        // Action pour ajouter un agent
-        ajouterAgentButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Demander à l'utilisateur les informations pour l'agent
-                String nomAgent = JOptionPane.showInputDialog(frame, "Entrez le nom de l'agent :");
-                String prenomAgent = JOptionPane.showInputDialog(frame, "Entrez le prénom de l'agent :");
-
-                // Ajouter l'agent
-                AgentImmobilier agent = new AgentImmobilier(nomAgent, prenomAgent, new ArrayList<>());
-                agence.ajouterAgent(agent);
-                outputArea.append("Agent ajouté : " + agent + "\n");
+    private void ajouterBien() {
+        try {
+            String idBien = JOptionPane.showInputDialog(frame, "Entrez l'ID du Bien :");
+            if (idBien == null || idBien.isEmpty()) {
+                outputArea.append("ID du bien est requis.\n");
+                return;
             }
-        });
 
-        // Action pour ajouter un client
-        ajouterClientButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Demander à l'utilisateur les informations pour le client
-                String nomClient = JOptionPane.showInputDialog(frame, "Entrez le nom du client :");
-                String prenomClient = JOptionPane.showInputDialog(frame, "Entrez le prénom du client :");
-                String emailClient = JOptionPane.showInputDialog(frame, "Entrez l'email du client :");
-                String telephoneClient = JOptionPane.showInputDialog(frame, "Entrez le telephone :");
-                // Ajouter le client
-                Client client = new Client(nomClient, prenomClient, emailClient,telephoneClient);
-                agence.ajouterClient(client);
-                outputArea.append("Client ajouté : " + client + "\n");
+            String typeBien = JOptionPane.showInputDialog(frame, "Entrez le type de Bien :");
+            if (typeBien == null || typeBien.isEmpty()) {
+                outputArea.append("Le type du bien est requis.\n");
+                return;
             }
-        });
 
-        // Action pour rechercher un bien
-        // Action pour rechercher un bien
-        rechercherBiensButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Demander les critères de recherche
-                String typeBien = JOptionPane.showInputDialog(frame, "Entrez le type de bien à rechercher :");
-                String localisation = JOptionPane.showInputDialog(frame, "Entrez la localisation à rechercher :");
-
-                // Demander le prix maximum
-                String prixMaxStr = JOptionPane.showInputDialog(frame, "Entrez le prix maximum :");
-                Double prixMax = null;
-                if (prixMaxStr != null && !prixMaxStr.isEmpty()) {
-                    try {
-                        prixMax = Double.parseDouble(prixMaxStr);
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(frame, "Veuillez entrer un prix valide.");
-                        return;
-                    }
-                }
-
-                // Recherche des biens
-                List<BienImmobilier> biens = agence.rechercherBiens(typeBien, null, null, localisation, prixMax);
-                outputArea.setText("");  // Vider la zone de texte avant d'afficher les résultats
-
-                if (biens.isEmpty()) {
-                    outputArea.append("Aucun bien trouvé.\n");
-                } else {
-                    for (BienImmobilier bien : biens) {
-                        // Afficher les informations détaillées du bien
-                        outputArea.append("ID : " + bien.getId() + "\n");
-                        outputArea.append("Type : " + bien.getType() + "\n");
-                        outputArea.append("Superficie : " + bien.getSurface() + " m²\n");
-                        outputArea.append("Prix : " + bien.getPrix() + " EUR\n");
-                        outputArea.append("Localisation : " + bien.getLocalisation() + "\n");
-                        outputArea.append("Description : " + bien.getDescription() + "\n");
-                        outputArea.append("Vendu : " + (bien.isVendu() ? "Oui" : "Non") + "\n");
-                        outputArea.append("------\n"); // Séparateur entre les biens
-                    }
-                }
+            double surface = promptForDouble("Entrez la surface (en m²) :");
+            if (surface <= 0) {
+                outputArea.append("Surface invalide.\n");
+                return;
             }
-        });
 
-
-
-
-        // Action pour acheter un bien
-        acheterBienButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Demander à l'utilisateur le client et le bien à acheter
-                String clientEmail = JOptionPane.showInputDialog(frame, "Entrez l'email du client :");
-                Client client = agence.rechercherClientParEmail(clientEmail);
-
-                if (client != null) {
-                    String idBien = JOptionPane.showInputDialog(frame, "Entrez l'ID du bien à acheter :");
-                    BienImmobilier bien = agence.rechercherBienParId(idBien);
-
-                    if (bien != null && !bien.isVendu()) {
-                        // Acheter le bien
-                        bien.setVendu(true);
-                        client.acheterBien(bien);
-                        outputArea.append("Client " + client.getNom() + " " + client.getPrenom() + " a acheté le bien : " + bien.getDescription() + "\n");
-                    } else {
-                        outputArea.append("Le bien n'est pas disponible ou déjà vendu.\n");
-                    }
-                } else {
-                    outputArea.append("Client non trouvé.\n");
-                }
+            double prix = promptForDouble("Entrez le prix :");
+            if (prix <= 0) {
+                outputArea.append("Prix invalide.\n");
+                return;
             }
-        });
+
+            String localisation = JOptionPane.showInputDialog(frame, "Entrez la localisation :");
+            if (localisation == null || localisation.isEmpty()) {
+                outputArea.append("La localisation est requise.\n");
+                return;
+            }
+
+            String description = JOptionPane.showInputDialog(frame, "Entrez la description du bien :");
+
+            BienImmobilier bien = new BienImmobilier(idBien, typeBien, surface, prix, localisation, description);
+
+            // Demander à l'utilisateur de choisir un agent via un choix prédéfini
+            AgentImmobilier agent = choisirAgent();
+            if (agent == null) {
+                outputArea.append("Agent non sélectionné.\n");
+                return;
+            }
+
+            bien.setAgent(agent); // Associer l'agent au bien
+
+            agence.ajouterBien(bien, agent);
+            outputArea.append("Bien ajouté : " + bien.getDescription() + "\n");
+        } catch (Exception ex) {
+            outputArea.append("Erreur lors de l'ajout du bien : " + ex.getMessage() + "\n");
+        }
+    }
+
+
+    private void ajouterClient() {
+        String nom = JOptionPane.showInputDialog(frame, "Entrez le nom du client :");
+        String prenom = JOptionPane.showInputDialog(frame, "Entrez le prénom du client :");
+        String email = JOptionPane.showInputDialog(frame, "Entrez l'email du client :");
+        String telephone = JOptionPane.showInputDialog(frame, "Entrez le numéro de téléphone du client :");
+
+        if (isValidClientInput(nom, prenom, email, telephone)) {
+            Client client = new Client(nom, prenom, email, telephone);
+            agence.ajouterClient(client);
+            outputArea.append("Client ajouté : " + client.getNom() + " " + client.getPrenom() + "\n");
+        } else {
+            outputArea.append("Informations client manquantes ou ajout annulé.\n");
+        }
+    }
+
+    private boolean isValidClientInput(String nom, String prenom, String email, String telephone) {
+        return nom != null && !nom.isEmpty() &&
+                prenom != null && !prenom.isEmpty() &&
+                email != null && !email.isEmpty() &&
+                telephone != null && !telephone.isEmpty();
+    }
+
+    private void acheterBien() {
+        String idBien = JOptionPane.showInputDialog(frame, "Entrez l'ID du Bien à acheter :");
+        BienImmobilier bien = agence.rechercherBienParId(idBien);
+
+        if (bien == null) {
+            outputArea.append("Aucun bien trouvé avec l'ID : " + idBien + "\n");
+            return;
+        }
+
+        if (bien.isVendu()) {
+            outputArea.append("Le bien avec l'ID " + idBien + " est déjà vendu.\n");
+            return;
+        }
+
+        String nomClient = JOptionPane.showInputDialog(frame, "Entrez le nom du client :");
+        Client client = agence.rechercherClientParNom(nomClient);
+
+        if (client == null) {
+            outputArea.append("Aucun client trouvé avec le nom : " + nomClient + "\n");
+            return;
+        }
+
+        agence.acheterBien(bien, client);
+
+        // Afficher le nom de l'agent responsable
+        String nomAgent = bien.getAgent() != null ? bien.getAgent().getNom() : "Inconnu";
+        outputArea.append("Le bien avec l'ID " + idBien + " a été vendu à " + nomClient + " par l'agent " + nomAgent + ".\n");
+    }
+
+
+    private void afficherBiensDisponibles() {
+        List<BienImmobilier> biensDisponibles = agence.rechercherBiensDisponibles();
+        outputArea.setText("");
+        if (biensDisponibles.isEmpty()) {
+            outputArea.append("Aucun bien disponible.\n");
+        } else {
+            for (BienImmobilier bien : biensDisponibles) {
+                outputArea.append("ID : " + bien.getId() + "\n");
+                outputArea.append("Type : " + bien.getType() + "\n");
+                outputArea.append("Superficie : " + bien.getSurface() + " m²\n");
+                outputArea.append("Prix : " + bien.getPrix() + " DA\n");
+                outputArea.append("Localisation : " + bien.getLocalisation() + "\n");
+                outputArea.append("Description : " + bien.getDescription() + "\n");
+                outputArea.append("------\n");
+            }
+        }
+    }
+
+    private void rechercherBiens() {
+        // Demander à l'utilisateur les critères de recherche
+        String type = JOptionPane.showInputDialog(frame, "Entrez le type du bien (ex: Maison, Appartement) :");
+        String surfaceMinStr = JOptionPane.showInputDialog(frame, "Surface minimale (m²) :");
+        Double surfaceMin = (surfaceMinStr != null && !surfaceMinStr.isEmpty()) ? Double.parseDouble(surfaceMinStr) : null;
+
+        String localisation = JOptionPane.showInputDialog(frame, "Entrez la localisation du bien (ex: Algiers) :");
+
+        String prixMaxStr = JOptionPane.showInputDialog(frame, "Prix maximal :");
+        Double prixMax = (prixMaxStr != null && !prixMaxStr.isEmpty()) ? Double.parseDouble(prixMaxStr) : null;
+
+        // Appeler la méthode de recherche
+        List<BienImmobilier> resultats = agence.rechercherBiens(type, surfaceMin, null, localisation, prixMax);
+
+        // Afficher les résultats
+        if (resultats.isEmpty()) {
+            outputArea.append("Aucun bien ne correspond aux critères.\n");
+        } else {
+            outputArea.append("Résultats de la recherche :\n");
+            for (BienImmobilier bien : resultats) {
+                outputArea.append(bien.getDescriptionComplete() + "\n\n");
+            }
+        }
+    }
+
+
+
+
+    private AgentImmobilier choisirAgent() {
+        String[] options = {"Alice Dupont", "Bob Martin", "Vincent Van Gogh"};
+        int choix = JOptionPane.showOptionDialog(frame, "Choisissez un agent :", "Sélection d'Agent",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+        switch (choix) {
+            case 0: return new AgentImmobilier("Alice", "Dupont", new ArrayList<>());
+            case 1: return new AgentImmobilier("Bob", "Martin", new ArrayList<>());
+            case 2: return new AgentImmobilier("Vincent", "Van Gogh", new ArrayList<>());
+            default: return null;
+        }
     }
 
     public static void main(String[] args) {
