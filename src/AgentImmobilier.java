@@ -5,7 +5,6 @@ public class AgentImmobilier {
     private String nom;
     private String prenom;
     private List<BienImmobilier> biens;
-    private AgentImmobilier agent;
 
     // Constructeur avec nom, prenom et une liste de biens
     public AgentImmobilier(String nom, String prenom, List<BienImmobilier> biens) {

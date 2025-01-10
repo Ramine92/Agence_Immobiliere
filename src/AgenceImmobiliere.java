@@ -121,14 +121,6 @@ public class AgenceImmobiliere {
         return disponibles;
     }
 
-    public AgentImmobilier rechercherAgentParNom(String nom) {
-        for (AgentImmobilier agent : agents) {
-            if (agent.getNom().equals(nom)) {
-                return agent;
-            }
-        }
-        return null;  // Aucun agent trouvé avec ce nom
-    }
 
 
     // Point d'entrée principal
